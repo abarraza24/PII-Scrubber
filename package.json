@@ -1,0 +1,23 @@
+{
+  "name": "pii-scrubber-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PII Assignment Technical Artifact",
+  "main": "index.js",
+  "workspaces":[
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace server && npm run dev --workspace client",
+    "dev:client": "npm run dev --workspace client",
+    "dev:server": "npm run dev --workspace server",
+    "build": "npm run build --workspace client",
+    "start": "npm run start --workspace server",
+    "scrub:cli": "npm run scrub --workspace server"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module"
+}
