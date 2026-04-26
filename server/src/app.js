@@ -37,4 +37,12 @@ app.get("/api/health", (_req, res) =>{
 
 app.use("/api/scrub", scrubRoutes);
 
+app.use(express.static(clientDist));
+app.use((req, res, next) => {
+  if (req.path.startsWith("/api")) return next();
+  res.sendFile(path.join(clientDist, "index.html"), (err) => {
+    if (err) next(err);
+  });
+});
+
 export default app;
