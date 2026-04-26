@@ -4,14 +4,25 @@ import helmet from "helmet";
 import morgan from "morgan";
 import scrubRoutes from "./routes/scrubRoutes.js"
 import dotenv from 'dotenv';
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const clientDist = path.join(__dirname, "../../client/dist");
+
+if (process.env.NODE_EN === "production"){
+    app.use(express.static(clientDist));
+    app.get(/^(?!\/api).*/, (_req, res) => {
+    res.sendFile(path.join(clientDist, "index.html"));
+  });
+}
 
 const app = express(); 
 
-app.use(
-    cors({
-        origin: process.env.CLIENT_URL || "http://localhost:5173"
-    })
-);
+if (process.env.NODE_ENV !== "production") {
+  app.use(cors({ origin: "http://localhost:5173" }));
+}
 
 app.use(helmet());
 app.use(morgan("dev"));
