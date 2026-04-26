@@ -16,9 +16,10 @@ const RULES =[
     },
     {
         type: "PHONE",
-        regex: /\b(?:\+?1[\s.-]?)?(?:\(\d{3}\)|\d{3})[\s.-]?\d{3}[\s.-]?\d{4}\b/g,
-        weight:2,
-        redact: () =>"***-***-****"
+        // Added regex to take a plain 505-555-4444 etc
+        regex: /(?<!\d)(?:\+?1[\s.-]?)?(?:\(\d{3}\)[\s.-]?|\d{3}[\s.-])\d{3}[\s.-]\d{4}(?!\d)/g,
+        weight: 2,
+        redact: () => "***-***-****"
     },
     {
         type: "SSN",
@@ -27,8 +28,14 @@ const RULES =[
         redact: () =>"***-**-****"
     },
     {
+        type:"IPV4",
+        regex: /\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\b/g,
+        weight: 1,
+        redact: () => "***.***.***.***"
+    },
+    {
         type: "CREDIT_CARD",
-        regex: /(?:\d[ -]*?){13,19}\b/g,
+        regex: /\b(?:\d{4}[\s\-.]){3}\d{4}\b|\b\d{13,16}\b/g, 
         weight: 5,
         postValidate: (match) => luhnCheck(match.replace(/\D/g, "")),
         redact: (match) => {
@@ -36,12 +43,6 @@ const RULES =[
             return `****-****-****-${digits.slice(-4)}`;
         }
     },
-    {
-        type:"IPV4",
-        regex: /\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\b/g,
-        weight: 1,
-        redact: () => "***.***.***.***"
-    }
 
 ];
 
@@ -71,55 +72,33 @@ const luhnCheck = (numStr) =>{
     return sum % 10 === 0;
 }
 
-export function scrubText(inputText, {strict = false} = {}){
-    const findings = [];
-    let transformedText = inputText;
+export function scrubText(inputText, { strict = false } = {}) {
+  const findings = [];
+  let redactedText = inputText;
 
-    for (const rule of RULES){
-        transformedText = transformedText.replace(rule.regex, (match) =>{
-            if(rule.postValidate && !rule.postValidate(match)){
-                return match;
-            }
-
-            const redacted = rule.redact(match, strict);
-
-            findings.push({
-                type: rule.type,
-                original: match,
-                redacted
-            });
-
-            return `[REDACTED:${rule.type}]`;
-        });
-    }
-
-    console.log("Middle State", transformedText)
-
-    let findingIndex = 0;
-
-    const redactedText = transformedText.replace(/\[REDACTED:[A-Z_]+\]/g, () =>{
-        const finding = findings[findingIndex];
-        findingIndex += 1;
-        return finding?.redacted ?? "[REDACTED]";
+  for (const rule of RULES) {
+    redactedText = redactedText.replace(rule.regex, (match) => {
+      if (rule.postValidate && !rule.postValidate(match)) {
+        return match; 
+      }
+      const redacted = rule.redact(match, strict);
+      findings.push({ type: rule.type, original: match, redacted });
+      return redacted;
     });
+  }
 
-    const summary = findings.reduce((accumulator, finding) =>{
-        accumulator[finding.type] =(accumulator[finding.type] || 0) + 1;
-        return accumulator;
-    }, {});
+  const summary = findings.reduce((acc, f) => {
+    acc[f.type] = (acc[f.type] || 0) + 1;
+    return acc;
+  }, {});
 
-    const riskScore = Math.min(
-        100,
-        findings.reduce((score, finding) =>{
-            const matchingRule = RULES.find((rule) => rule.type === finding.type);
-            return score + (matchingRule?.weight ?? 1) * 10;
-        }, 0)
-    );
+  const riskScore = Math.min(
+    100,
+    findings.reduce((score, f) => {
+      const rule = RULES.find((r) => r.type === f.type);
+      return score + (rule?.weight ?? 1) * 10;
+    }, 0)
+  );
 
-    return {
-        redactedText,
-        findings,
-        summary, 
-        riskScore
-    };
+  return { redactedText, findings, summary, riskScore };
 }

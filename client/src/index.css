@@ -1,14 +1,184 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 @plugin "daisyui" {
   themes: light --default, dark --prefersdark, coffee;
 }
 
- html,
- body,
- #root{
-  min-height: 100%;
- }
+/* ─── Color tokens ──────────────────────────────── */
+:root {
+  --navy:      #1B3A5C;
+  --navy-mid:  #234972;
+  --coral:     #E8572A;
+  --coral-lite:#F7E8E2;
+  --cream:     #F8F5F0;
+  --cream-md:  #EDE9E2;
+}
 
- body {
+html, body, #root { min-height: 100%; }
+body {
   min-height: 100vh;
- }
+  font-family: 'DM Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Typography ─────────────────────────────────── */
+h1, h2, h3, .card-title, .brand-text {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+/* ─── Keyframes ─────────────────────────────────── */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes staggerIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+@keyframes floatY {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-7px); }
+}
+@keyframes pulseRing {
+  0%,100% { opacity: 0.12; transform: scale(1); }
+  50%      { opacity: 0.28; transform: scale(1.07); }
+}
+
+/* ─── Utility animation classes ─────────────────── */
+.anim-up    { animation: fadeSlideUp 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+.anim-fade  { animation: fadeIn 0.38s ease both; }
+.anim-scale { animation: scaleIn 0.45s cubic-bezier(0.22,1,0.36,1) both; }
+.anim-float { animation: floatY 4s ease-in-out infinite; }
+
+.d1 { animation-delay: 0.06s; }
+.d2 { animation-delay: 0.12s; }
+.d3 { animation-delay: 0.18s; }
+.d4 { animation-delay: 0.24s; }
+.d5 { animation-delay: 0.30s; }
+
+/* Findings rows stagger */
+.finding-row { animation: staggerIn 0.35s cubic-bezier(0.22,1,0.36,1) both; }
+.finding-row:nth-child(1)   { animation-delay: 0.04s; }
+.finding-row:nth-child(2)   { animation-delay: 0.08s; }
+.finding-row:nth-child(3)   { animation-delay: 0.12s; }
+.finding-row:nth-child(4)   { animation-delay: 0.16s; }
+.finding-row:nth-child(5)   { animation-delay: 0.20s; }
+.finding-row:nth-child(n+6) { animation-delay: 0.24s; }
+
+/* ─── Cards ──────────────────────────────────────── */
+.card-lifted {
+  border: 1px solid oklch(var(--b3));
+  border-radius: 1.25rem;
+  transition: transform 0.22s cubic-bezier(0.22,1,0.36,1),
+              box-shadow 0.22s cubic-bezier(0.22,1,0.36,1);
+}
+.card-lifted:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 44px -12px rgba(27,58,92,0.16);
+}
+
+/* ─── Scrub button shimmer ──────────────────────── */
+.btn-scrub {
+  position: relative;
+  overflow: hidden;
+}
+.btn-scrub::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg, transparent 38%, rgba(255,255,255,0.22) 50%, transparent 62%
+  );
+  background-size: 200% 100%;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.btn-scrub:hover:not(:disabled)::after {
+  opacity: 1;
+  animation: shimmer 0.65s linear;
+}
+
+/* ─── Navbar ─────────────────────────────────────── */
+.navbar-glass {
+  background: oklch(var(--b1) / 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid oklch(var(--b3) / 0.8);
+}
+
+/* ─── Hero section ───────────────────────────────── */
+.hero-bg {
+  background: var(--navy);
+  background-image:
+    radial-gradient(ellipse at 15% 60%, rgba(232,87,42,0.18) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 15%, rgba(255,255,255,0.05) 0%, transparent 45%);
+}
+.hero-pulse-ring {
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  border: 2px solid var(--coral);
+  animation: pulseRing 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ─── Risk ring ──────────────────────────────────── */
+.risk-low    { --rc: #22a06b; }
+.risk-medium { --rc: #d97706; }
+.risk-high   { --rc: #E8572A; }
+
+/* ─── PII type badge colors ─────────────────────── */
+.badge-EMAIL       { background:#DBEAFE; color:#1E3A8A; border:none; }
+.badge-PHONE       { background:#D1FAE5; color:#064E3B; border:none; }
+.badge-SSN         { background:#FEE2E2; color:#7F1D1D; border:none; }
+.badge-CREDIT_CARD { background:#EDE9FE; color:#4C1D95; border:none; }
+.badge-IPV4        { background:#FEF3C7; color:#78350F; border:none; }
+
+/* ─── Mono output ───────────────────────────────── */
+.output-pre {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.8rem;
+  line-height: 1.72;
+}
+
+/* ─── Empty dashed box ──────────────────────────── */
+.empty-dashed {
+  border: 2px dashed oklch(var(--bc) / 0.14);
+  border-radius: 1rem;
+}
+
+/* ─── Stat accent bars ───────────────────────────── */
+.stat-accent-navy  { border-top: 3px solid var(--navy); }
+.stat-accent-coral { border-top: 3px solid var(--coral); }
+
+/* ─── Smooth color transitions ───────────────────── */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color;
+  transition-duration: 0.18s;
+  transition-timing-function: ease;
+}
+.card, .btn, .badge, .stat {
+  transition-property: background-color, border-color, color,
+                        box-shadow, transform, opacity;
+}
+
+/* ─── Mobile ─────────────────────────────────────── */
+@media (max-width: 640px) {
+  .btn { min-height: 2.75rem; }
+  .card-body { padding: 1.25rem !important; }
+  h1.hero-title { font-size: 2.1rem !important; line-height: 1.15; }
+}
