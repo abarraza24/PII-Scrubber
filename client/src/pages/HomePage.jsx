@@ -10,7 +10,7 @@ import { downloadTextFile } from "../utils/downloadTextFile.js";
 const SAMPLE_TEXT = `Customer Name: Alexis Barraza
 Email: alexis@example.com
 Phone: (505) 555-4444
-Card: 4222 1111 1111 1111
+Card: 4111 1111 1111 1111
 IP Address: 192.168.1.10
 SSN: 123-45-6789`;
 
